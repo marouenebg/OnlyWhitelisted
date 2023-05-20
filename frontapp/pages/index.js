@@ -69,7 +69,7 @@ SetLoading(true);
 tx.wait();
 SetLoading(false);
 
-await getNumberWhitelistedAddresses();
+await getNumberOfWhitelisted();
 SetJointedWhitelist(true);
 }
 catch(err) {
@@ -88,6 +88,35 @@ SetNumberofWhitelisted(_numberOfwhitelisted);
 }catch(err) {
     console.error(err);
   }
+};
+
+const checkAddressInWhitelist = async () => {
+  try {
+const provider = await getSignerOrProvider(true);
+const address = await provider.getAddress()
+const WhitelistContract = new Contract(WHITELIST_CONTRACT_ADDRESS, abi, provider);
+
+const IsWhitelistAddress = await WhitelistContract.WhitelistedAddress(address);
+SetJointedWhitelist(true);
+}catch(err) {
+  console.log(err);
+}
+};
+const connectWallet = async () => {
+  try {
+await getSignerOrProvider(true);
+SetWalletConnected(true);
+checkAddressInWhitelist();
+getNumberOfWhitelisted();
+
+} catch(err) {
+  console.error(err);
+}
+};
+
+//rederButton returns a button based of the state of the app
+const rederButton = () => {
+
 }
 
 
