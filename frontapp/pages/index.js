@@ -177,9 +177,7 @@ return (
         </div>
       </div>
 
-      <footer className={styles.footer}>
-        Made with &#10084; by Crypto Devs
-      </footer>
+     
     </div>
   );
 }
