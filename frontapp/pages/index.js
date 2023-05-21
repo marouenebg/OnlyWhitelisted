@@ -38,8 +38,8 @@ const web3ModalRef = useRef();
 
 const  getSignerOrProvider = async (needSigner = false) => {
 //we need to access the `current` value to get access to the underlying object
-const provider = web3ModalRef.current.connect();
-const web3provider = providers.Web3Provider(provider);
+const provider = await web3ModalRef.current.connect();
+const web3provider = new providers.Web3Provider(provider);
 
 //if user is not conencted to the goerli netwrok, throw an error 
 const { chainId } = await web3provider.getNetwork();
@@ -83,7 +83,7 @@ try {
 const provider = await getSignerOrProvider(false);
 const whitelistContract = new Contract(WHITELIST_CONTRACT_ADDRESS, abi, provider);
 
-const _numberOfwhitelisted = await whitelistContract.NumberofWhitelisted();
+const _numberOfwhitelisted = await whitelistContract.NumberWhitelistedAddresses();
 SetNumberofWhitelisted(_numberOfwhitelisted);
 }catch(err) {
     console.error(err);
@@ -106,7 +106,7 @@ const connectWallet = async () => {
   try {
 await getSignerOrProvider(true);
 SetWalletConnected(true);
-checkAddressInWhitelist();
+
 getNumberOfWhitelisted();
 
 } catch(err) {
@@ -115,15 +115,71 @@ getNumberOfWhitelisted();
 };
 
 //rederButton returns a button based of the state of the app
-const rederButton = () => {
+const renderButton = () => {
+    if (walletConnected) {
+      if (JointedWhitelist) {
+        return (
+          <div className={styles.description}>
+            Thanks for joining the Whitelist!
+          </div>
+        );
+      } else if (Loading) {
+        return <button className={styles.button}>Loading...</button>;
+      } else {
+        return (
+          <button onClick={addAddressToWhitelist} className={styles.button}>
+            Join the Whitelist
+          </button>
+        );
+      }
+    } else {
+      return (
+        <button onClick={connectWallet} className={styles.button}>
+          Connect your wallet
+        </button>
+      );
+    }
+  };
 
-}
 
+useEffect(() => {
 
-  return (
+// the use effect will be triggered based on the wallet connection
+
+if (!walletConnected) {
+  web3ModalRef.current = new Web3Modal({
+        network: "goerli",
+        providerOptions: {},
+        disableInjectedProvider: false,
+      });
+  connectWallet();
+    }
+ }, [walletConnected]);
+
+return (
     <div>
-      <p>test the function</p>
-      <p>test 2</p>
+      <Head>
+        <title>Whitelist Dapp</title>
+        <meta name="description" content="Whitelist-Dapp" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <div className={styles.main}>
+        <div>
+          <h1 className={styles.title}>Welcome to Crypto Devs!</h1>
+          <div className={styles.description}>
+            {/* Using HTML Entities for the apostrophe */}
+            It&#39;s an NFT collection for developers in Crypto.
+          </div>
+          <div className={styles.description}>
+            {JointedWhitelist} have already joined the Whitelist
+          </div>
+          {renderButton()}
+        </div>
+      </div>
+
+      <footer className={styles.footer}>
+        Made with &#10084; by Crypto Devs
+      </footer>
     </div>
   );
 }
